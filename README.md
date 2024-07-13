@@ -12,7 +12,7 @@ Only Redis is currently supported as a cache backend.
 redisCli := redis.NewClient(&redis.Options{Addr: "localhost:6379", DB: 0})
 transport := httpclientcache.NewTransport(
 	rediscache.New(redisCli),
-    httpclientcache.WithExpiration(5*time.Minute),
+	httpclientcache.WithExpiration(5*time.Minute),
 )
 client := &http.Client{Transport: transport}
 ```
