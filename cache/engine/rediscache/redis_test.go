@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"testing"
 	"time"
@@ -95,7 +95,7 @@ func TestCacheEngineGetAndSet(t *testing.T) {
 		assert.NoError(t, err)
 		assert.True(t, ok)
 		assert.Equal(t, http.StatusOK, res.StatusCode)
-		resb, err := ioutil.ReadAll(res.Body)
+		resb, err := io.ReadAll(res.Body)
 		assert.NoError(t, err)
 		assert.Equal(t, "OK\n", string(resb))
 	})
