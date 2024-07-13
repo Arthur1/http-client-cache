@@ -1,4 +1,4 @@
-package cache
+package key
 
 import (
 	"bytes"
@@ -13,7 +13,13 @@ type KeyGenerator interface {
 }
 
 type DefaultKeyGenerator struct {
-	PartationKey string
+	PartitionKey string
+}
+
+func NewKeyGenerator(partitionKey string) *DefaultKeyGenerator {
+	return &DefaultKeyGenerator{
+		PartitionKey: partitionKey,
+	}
 }
 
 func (g *DefaultKeyGenerator) Key(req *http.Request) (string, error) {
@@ -33,5 +39,5 @@ func (g *DefaultKeyGenerator) Key(req *http.Request) (string, error) {
 	h.Write([]byte(req.Method))
 	h.Write([]byte(req.URL.String()))
 	h.Write(body)
-	return fmt.Sprintf("%s_%x", g.PartationKey, h.Sum64()), nil
+	return fmt.Sprintf("%s_%x", g.PartitionKey, h.Sum64()), nil
 }

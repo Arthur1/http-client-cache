@@ -1,8 +1,5 @@
-# http-client-cache
+package main
 
-## Example
-
-```go
 import (
 	"log/slog"
 	"net/http"
@@ -40,4 +37,3 @@ func main() {
 	resd3, _ := httputil.DumpResponse(res3, false)
 	slog.Info("res3", slog.String("response", string(resd3)))
 }
-```

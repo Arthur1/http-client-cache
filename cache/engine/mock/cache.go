@@ -6,8 +6,8 @@
 //	mockgen -source=cache.go -destination=./mock/cache.go
 //
 
-// Package mock_cache is a generated GoMock package.
-package mock_cache
+// Package mock_engine is a generated GoMock package.
+package mock_engine
 
 import (
 	context "context"

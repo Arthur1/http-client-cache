@@ -10,26 +10,26 @@ import (
 
 	"golang.org/x/sync/singleflight"
 
-	"github.com/Arthur1/http-client-cache/cache"
+	"github.com/Arthur1/http-client-cache/cache/engine"
 )
 
 type Transport struct {
-	cacheEngine          cache.CacheEngine
-	child                http.RoundTripper
+	cacheEngine          engine.CacheEngine
+	base                 http.RoundTripper
 	cacheableStatusCodes map[int]struct{}
 	logger               *slog.Logger
 	expiration           time.Duration
 }
 
 var (
-	defaultChild                = http.DefaultTransport
+	defaultBase                 = http.DefaultTransport
 	defaultLogger               = slog.Default()
 	defaultCacheableStatusCodes = map[int]struct{}{http.StatusOK: {}}
 	defaultExpiration           = 1 * time.Minute
 )
 
 type options struct {
-	child                http.RoundTripper
+	base                 http.RoundTripper
 	cacheableStatusCodes map[int]struct{}
 	logger               *slog.Logger
 	expiration           time.Duration
@@ -40,22 +40,22 @@ type Option interface {
 }
 
 var (
-	_ Option = childOption{}
+	_ Option = baseOption{}
 	_ Option = cacheableStatusCodesOption{}
 	_ Option = loggerOption{}
 	_ Option = expirationOption(0)
 )
 
-type childOption struct {
-	child http.RoundTripper
+type baseOption struct {
+	base http.RoundTripper
 }
 
-func (o childOption) apply(opts *options) {
-	opts.child = http.RoundTripper(o.child)
+func (o baseOption) apply(opts *options) {
+	opts.base = http.RoundTripper(o.base)
 }
 
-func WithChild(child http.RoundTripper) childOption {
-	return childOption{child}
+func WithBase(child http.RoundTripper) baseOption {
+	return baseOption{child}
 }
 
 type cacheableStatusCodesOption []int
@@ -93,21 +93,20 @@ func WithCacheableStatusCodes(statusCodes []int) cacheableStatusCodesOption {
 	return cacheableStatusCodesOption(statusCodes)
 }
 
-func NewTransport(cacheEngine cache.CacheEngine, opts ...Option) http.RoundTripper {
+func NewTransport(cacheEngine engine.CacheEngine, opts ...Option) http.RoundTripper {
 	options := &options{
-		child:                defaultChild,
+		base:                 defaultBase,
 		logger:               defaultLogger,
 		cacheableStatusCodes: defaultCacheableStatusCodes,
 		expiration:           defaultExpiration,
 	}
-
 	for _, o := range opts {
 		o.apply(options)
 	}
 
 	return &Transport{
 		cacheEngine:          cacheEngine,
-		child:                options.child,
+		base:                 options.base,
 		logger:               options.logger,
 		cacheableStatusCodes: options.cacheableStatusCodes,
 		expiration:           options.expiration,
@@ -121,13 +120,13 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	key, err := t.cacheEngine.Key(req)
 	if err != nil {
 		t.logger.ErrorContext(ctx, "through http-client-cache because failed to generate cache key", slog.Any("error", err))
-		return t.child.RoundTrip(req)
+		return t.base.RoundTrip(req)
 	}
 
 	cachedRes, ok, err := t.cacheEngine.Get(ctx, key, req)
 	if err != nil {
 		t.logger.ErrorContext(ctx, "through http-client-cache because failed to get from cache", slog.Any("error", err))
-		return t.child.RoundTrip(req)
+		return t.base.RoundTrip(req)
 	}
 	if ok {
 		// cache hit
@@ -135,7 +134,7 @@ func (t *Transport) RoundTrip(req *http.Request) (*http.Response, error) {
 	}
 
 	maybeResb, err, _ := group.Do(key, func() (any, error) {
-		res, err := t.child.RoundTrip(req)
+		res, err := t.base.RoundTrip(req)
 		if err != nil {
 			return nil, err
 		}

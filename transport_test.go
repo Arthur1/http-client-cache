@@ -13,7 +13,7 @@ import (
 	"testing"
 	"time"
 
-	mock_cache "github.com/Arthur1/http-client-cache/cache/mock"
+	mock_engine "github.com/Arthur1/http-client-cache/cache/engine/mock"
 	"github.com/Arthur1/http-client-cache/internal/testutil"
 	"github.com/stretchr/testify/assert"
 	"go.uber.org/mock/gomock"
@@ -26,9 +26,9 @@ func assertTransport(t *testing.T, maybeTranport http.RoundTripper) *Transport {
 	return transport
 }
 
-type myChildTransport struct{}
+type myTransport struct{}
 
-func (t *myChildTransport) RoundTrip(req *http.Request) (*http.Response, error) {
+func (t *myTransport) RoundTrip(req *http.Request) (*http.Response, error) {
 	return nil, nil
 }
 
@@ -36,20 +36,20 @@ func TestNewTransport(t *testing.T) {
 	t.Parallel()
 	t.Run("Default", func(t *testing.T) {
 		t.Parallel()
-		cacheEngine := &mock_cache.MockCacheEngine{}
+		cacheEngine := &mock_engine.MockCacheEngine{}
 		transport := assertTransport(t, NewTransport(cacheEngine))
 		assert.Equal(t, cacheEngine, transport.cacheEngine)
-		assert.Equal(t, defaultChild, transport.child)
+		assert.Equal(t, defaultBase, transport.base)
 		testutil.NoDiff(t, defaultCacheableStatusCodes, transport.cacheableStatusCodes, nil)
 		assert.Equal(t, defaultLogger, transport.logger)
 		assert.Equal(t, defaultExpiration, transport.expiration)
 	})
 
-	t.Run("WithChild", func(t *testing.T) {
+	t.Run("WithBase", func(t *testing.T) {
 		t.Parallel()
-		child := &myChildTransport{}
-		transport := assertTransport(t, NewTransport(nil, WithChild(child)))
-		assert.Equal(t, child, transport.child)
+		base := &myTransport{}
+		transport := assertTransport(t, NewTransport(nil, WithBase(base)))
+		assert.Equal(t, base, transport.base)
 	})
 
 	t.Run("WithCacheableStatusCodes", func(t *testing.T) {
@@ -70,7 +70,7 @@ func TestNewTransport(t *testing.T) {
 		assert.Equal(t, logger, transport.logger)
 	})
 
-	t.Run("WithTransport", func(t *testing.T) {
+	t.Run("WithExpiration", func(t *testing.T) {
 		t.Parallel()
 		expiration := 5 * time.Hour
 		transport := assertTransport(t, NewTransport(nil, WithExpiration(expiration)))
@@ -91,7 +91,7 @@ func TestTransportRoundTrip(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
-		cacheEngineMock := mock_cache.NewMockCacheEngine(ctrl)
+		cacheEngineMock := mock_engine.NewMockCacheEngine(ctrl)
 		cacheEngineMock.EXPECT().Key(gomock.Any()).Return("", nil)
 		cacheEngineMock.EXPECT().Get(gomock.Any(), "", gomock.Any()).Return(nil, false, nil).Times(1)
 		cacheEngineMock.EXPECT().Set(gomock.Any(), "", gomock.Any(), time.Minute).Return(nil).Times(1)
@@ -119,7 +119,7 @@ func TestTransportRoundTrip(t *testing.T) {
 
 		ctrl := gomock.NewController(testutil.NewConcurrentTestReporter(t))
 		defer ctrl.Finish()
-		cacheEngineMock := mock_cache.NewMockCacheEngine(ctrl)
+		cacheEngineMock := mock_engine.NewMockCacheEngine(ctrl)
 		cacheEngineMock.EXPECT().Key(gomock.Any()).Return("", nil).AnyTimes()
 		cacheEngineMock.EXPECT().Get(gomock.Any(), "", gomock.Any()).Return(nil, false, nil).AnyTimes()
 		cacheEngineMock.EXPECT().Set(gomock.Any(), "", gomock.Any(), time.Minute).Return(nil).AnyTimes()
@@ -157,7 +157,7 @@ func TestTransportRoundTrip(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
-		cacheEngineMock := mock_cache.NewMockCacheEngine(ctrl)
+		cacheEngineMock := mock_engine.NewMockCacheEngine(ctrl)
 		cacheEngineMock.EXPECT().Key(gomock.Any()).Return("", nil)
 		cacheEngineMock.EXPECT().Get(gomock.Any(), "", gomock.Any()).Return(nil, false, nil).Times(1)
 		cacheEngineMock.EXPECT().Set(gomock.Any(), "", gomock.Any(), time.Minute).Return(nil).Times(0)
@@ -184,7 +184,7 @@ func TestTransportRoundTrip(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
-		cacheEngineMock := mock_cache.NewMockCacheEngine(ctrl)
+		cacheEngineMock := mock_engine.NewMockCacheEngine(ctrl)
 		cacheEngineMock.EXPECT().Key(gomock.Any()).Return("", nil).Times(1)
 		cacheEngineMock.EXPECT().Set(gomock.Any(), "", gomock.Any(), time.Minute).Return(nil).Times(0)
 
@@ -211,7 +211,7 @@ func TestTransportRoundTrip(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
-		cacheEngineMock := mock_cache.NewMockCacheEngine(ctrl)
+		cacheEngineMock := mock_engine.NewMockCacheEngine(ctrl)
 		cacheEngineMock.EXPECT().Key(gomock.Any()).Return("", fmt.Errorf("error"))
 		cacheEngineMock.EXPECT().Get(gomock.Any(), "", gomock.Any()).Return(nil, false, nil).Times(0)
 		cacheEngineMock.EXPECT().Set(gomock.Any(), "", gomock.Any(), time.Minute).Return(nil).Times(0)
@@ -238,7 +238,7 @@ func TestTransportRoundTrip(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
-		cacheEngineMock := mock_cache.NewMockCacheEngine(ctrl)
+		cacheEngineMock := mock_engine.NewMockCacheEngine(ctrl)
 		cacheEngineMock.EXPECT().Key(gomock.Any()).Return("", nil)
 		cacheEngineMock.EXPECT().Get(gomock.Any(), "", gomock.Any()).Return(nil, false, fmt.Errorf("error")).Times(1)
 		cacheEngineMock.EXPECT().Set(gomock.Any(), "", gomock.Any(), time.Minute).Return(nil).Times(0)
@@ -265,7 +265,7 @@ func TestTransportRoundTrip(t *testing.T) {
 
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
-		cacheEngineMock := mock_cache.NewMockCacheEngine(ctrl)
+		cacheEngineMock := mock_engine.NewMockCacheEngine(ctrl)
 		cacheEngineMock.EXPECT().Key(gomock.Any()).Return("", nil)
 		cacheEngineMock.EXPECT().Get(gomock.Any(), "", gomock.Any()).Return(nil, false, nil).Times(1)
 		cacheEngineMock.EXPECT().Set(gomock.Any(), "", gomock.Any(), time.Minute).Return(fmt.Errorf("error")).Times(1)
