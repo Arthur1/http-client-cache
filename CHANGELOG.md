@@ -1,5 +1,8 @@
 # Changelog
 
+## [v0.1.1](https://github.com/Arthur1/http-client-cache/compare/v0.1.0...v0.1.1) - 2024-07-13
+- writes RedisCacheEngine test by @Arthur1 in https://github.com/Arthur1/http-client-cache/pull/6
+
 ## [v0.1.0](https://github.com/Arthur1/http-client-cache/commits/v0.1.0) - 2024-07-13
 - Configure Renovate by @renovate in https://github.com/Arthur1/http-client-cache/pull/1
 - update README.md by @Arthur1 in https://github.com/Arthur1/http-client-cache/pull/5
