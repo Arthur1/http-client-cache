@@ -1,5 +1,22 @@
 # http-client-cache
 
+http-client-cache is a Go library for transparent HTTP client-side caching using Transport.
+
+Under the standard configuration, the request is retrieved from cache if the request URL, method, and body match.
+
+Only Redis is currently supported as a cache backend.
+
+## Usage
+
+```go
+redisCli := redis.NewClient(&redis.Options{Addr: "localhost:6379", DB: 0})
+transport := httpclientcache.NewTransport(
+	rediscache.New(redisCli),
+    httpclientcache.WithExpiration(5*time.Minute),
+)
+client := &http.Client{Transport: transport}
+```
+
 ## Example
 
 ```go
@@ -18,6 +35,7 @@ import (
 func main() {
 	redisCli := redis.NewClient(&redis.Options{Addr: "localhost:6379", DB: 0})
 	transport := httpclientcache.NewTransport(
+        // By changing the argument of NewKeyGenerator, the cache space can be separated by such as user.
 		rediscache.New(redisCli, rediscache.WithKeyGenerator(key.NewKeyGenerator("**userid**"))),
 		httpclientcache.WithExpiration(5*time.Minute),
 	)
