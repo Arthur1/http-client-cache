@@ -6,7 +6,7 @@ require (
 	github.com/alicebob/miniredis/v2 v2.33.0
 	github.com/go-redis/cache/v9 v9.0.0
 	github.com/google/go-cmp v0.6.0
-	github.com/redis/go-redis/v9 v9.0.0-rc.4
+	github.com/redis/go-redis/v9 v9.5.4
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/mock v0.4.0
 	golang.org/x/sync v0.7.0
