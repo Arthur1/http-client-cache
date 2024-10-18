@@ -1,6 +1,8 @@
 module github.com/Arthur1/http-client-cache
 
-go 1.21.0
+go 1.22
+
+toolchain go1.23.2
 
 require (
 	github.com/alicebob/miniredis/v2 v2.33.0
@@ -8,7 +10,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/stretchr/testify v1.9.0
-	go.uber.org/mock v0.4.0
+	go.uber.org/mock v0.5.0
 	golang.org/x/sync v0.8.0
 )
 
@@ -23,8 +25,8 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.3.4 // indirect
 	github.com/vmihailenco/tagparser/v2 v2.0.0 // indirect
 	github.com/yuin/gopher-lua v1.1.1 // indirect
-	golang.org/x/mod v0.11.0 // indirect
-	golang.org/x/sys v0.4.0 // indirect
-	golang.org/x/tools v0.4.0 // indirect
+	golang.org/x/mod v0.18.0 // indirect
+	golang.org/x/sys v0.21.0 // indirect
+	golang.org/x/tools v0.22.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
