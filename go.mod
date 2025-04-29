@@ -8,7 +8,7 @@ require (
 	github.com/google/go-cmp v0.6.0
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/stretchr/testify v1.9.0
-	go.uber.org/mock v0.4.0
+	go.uber.org/mock v0.5.2
 	golang.org/x/sync v0.8.0
 )
 
