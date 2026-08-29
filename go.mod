@@ -1,6 +1,6 @@
 module github.com/Arthur1/http-client-cache
 
-go 1.21.0
+go 1.25.0
 
 require (
 	github.com/alicebob/miniredis/v2 v2.33.0
@@ -9,7 +9,7 @@ require (
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/mock v0.4.0
-	golang.org/x/sync v0.8.0
+	golang.org/x/sync v0.22.0
 )
 
 require (
