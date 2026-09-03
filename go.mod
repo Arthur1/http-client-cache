@@ -5,7 +5,7 @@ go 1.21.0
 require (
 	github.com/alicebob/miniredis/v2 v2.33.0
 	github.com/go-redis/cache/v9 v9.0.0
-	github.com/google/go-cmp v0.6.0
+	github.com/google/go-cmp v0.7.0
 	github.com/redis/go-redis/v9 v9.6.1
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/mock v0.4.0
